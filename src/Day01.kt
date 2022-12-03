@@ -1,15 +1,32 @@
 fun main() {
+    var maxCalories = 0
+    var currentCalories = 0
+    var caloriesPerElf = arrayOf<Int>()
+
     fun part1(input: List<String>): Int {
-        return input.size
+
+        for (cal in input) {
+            if (cal == "") {
+                if (currentCalories > maxCalories) {
+                    maxCalories = currentCalories
+                }
+                caloriesPerElf += currentCalories
+                currentCalories = 0
+            } else {
+                currentCalories += cal.toInt()
+            }
+        }
+        caloriesPerElf += currentCalories
+        return maxCalories
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        caloriesPerElf.sort()
+        return caloriesPerElf.takeLast(3).sum()
     }
 
-    // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day01_test")
-    check(part1(testInput) == 1)
+    check(part1(testInput) == 24000)
 
     val input = readInput("Day01")
     println(part1(input))
