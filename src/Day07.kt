@@ -82,8 +82,7 @@ class Directory(val name: String, val inputIndex: Int) {
             return dirContents[name]!!.sumOf { it.size }
         } else {
             val childDirs = map[name]!!.children.map { map[it]!! }
-
-            return childDirs.sumOf { it.findDirSize(map, dirContents) } + dirContents[name].let { it.sumOf { it.size } }
+            return childDirs.sumOf { it.findDirSize(map, dirContents) } + dirContents[name]!!.sumOf { it.size }
         }
         return 0
     }
