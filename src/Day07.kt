@@ -36,10 +36,10 @@ fun main() {
             dirSize[dir.name] = size
         }
 
-        val eSize = dirs[2].findDirSize(dirsMap, directoryContents)
-        check(eSize == 584)
-        val aSize = dirs[1].findDirSize(dirsMap, directoryContents)
-        check(aSize == 94853)
+//        val eSize = dirs[2].findDirSize(dirsMap, directoryContents)
+//        check(eSize == 584)
+//        val aSize = dirs[1].findDirSize(dirsMap, directoryContents)
+//        check(aSize == 94853)
 
         var sumOfDirSizeUnderTenK = 0
         for ((dirName, size) in dirSize) {
@@ -52,14 +52,56 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return 0
+        var files = mutableListOf<File>()
+        var dirs = mutableListOf<Directory>()
+        for ((index, ls) in input.withIndex()) {
+            val lsResult = ls.split(" ")
+            if (lsResult[0].toIntOrNull() != null) {
+                files += File(lsResult[1], lsResult[0].toInt(), index)
+            }
+            if (lsResult[1] == "cd" && lsResult[2] != "..") {
+                dirs += Directory(lsResult[2], index)
+            }
+        }
+        var directoryContents = mutableMapOf<String, MutableList<File>>()
+        files.forEach {
+            print(it.size)
+            val dir = it.findDirectory(input)
+            println(" " + it.name + " " + dir)
+            val dirFiles = if (directoryContents[dir] == null) {
+                directoryContents[dir] = arrayListOf(it)
+            } else {
+                directoryContents[dir]!! += it
+            }
+        }
+//        check(directoryContents["a"]!!.size == 3)
+//        check(directoryContents["e"]!!.size == 1)
+//        check(directoryContents["d"]!!.size == 4)
+//        check(dirs.size == 4)
+        dirs.forEach { it.findChild(input) }
+        val dirsMap = dirs.associateBy(keySelector = {it.name}, valueTransform = {it})
+        var dirSize = mutableMapOf<String, Int>()
+
+        for (dir in dirs) {
+            val size = dir.findDirSize(dirsMap, directoryContents)
+            dirSize[dir.name] = size
+        }
+
+        val dirSizeDelete = 30000000 - (70000000 - dirSize["/"]!!)
+        var currentDelete = 70000000
+        for ((dirName, size) in dirSize) {
+            if (size > dirSizeDelete && size <= currentDelete) {
+                currentDelete = size
+            }
+        }
+        return currentDelete
     }
 
     val testInput = readInput("Day07_test")
     check(part1(testInput) == 95437)
 
     val input = readInput("Day07")
-    println(part1(input))
+//    println(part1(input))
     println(part2(input))
 }
 class Directory(val name: String, val inputIndex: Int) {
@@ -82,9 +124,9 @@ class Directory(val name: String, val inputIndex: Int) {
             return dirContents[name]!!.sumOf { it.size }
         } else {
             val childDirs = map[name]!!.children.map { map[it]!! }
-            return childDirs.sumOf { it.findDirSize(map, dirContents) } + dirContents[name]!!.sumOf { it.size }
+            val sizOfCurrent = dirContents[name]?.let { it.sumOf { it.size } } ?: run { 0 }
+            return childDirs.sumOf { it.findDirSize(map, dirContents) } + sizOfCurrent
         }
-        return 0
     }
 }
 class File(val name: String, val size: Int, val inputIndex: Int) {
